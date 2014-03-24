@@ -10,6 +10,8 @@ use Phulner\NodeVisitor\Tainter;
 use Phulner\NodeVisitor\Replacer;
 use Phulner\NodeVisitor\Scope;
 use Phulner\Function_\Sanitizer\Factory;
+use Phulner\Lexer\KeepOriginalValue as KeepOriginalValueLexer;
+use Phulner\PrettyPrinter\KeepOriginalValue as KeepOriginalValuePrettyPrinter;
 
 class Xss extends InjectorAbstract {
     public function __construct () {
@@ -26,9 +28,9 @@ class Xss extends InjectorAbstract {
 
     public function inject($code, $options) {
         $nodeDumper = new \PhpParser\NodeDumper;
-        $prettyPrinter = new \PhpParser\PrettyPrinter\Standard;
+        $prettyPrinter = new KeepOriginalValuePrettyPrinter;
 
-        $parser = new Parser(new Lexer);
+        $parser = new Parser(new KeepOriginalValueLexer);
 
         $statements = $parser->parse("<?php\n" . $code);
 
