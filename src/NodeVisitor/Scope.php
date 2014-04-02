@@ -1,21 +1,24 @@
 <?php
 namespace Phulner\NodeVisitor;
 
-use Phulner\NodeVisitor\Scope\Taintable;
+use Phulner\NodeVisitor\Scope\Variable;
 
 use PhpParser\Node\Expr;
 
 class Scope {
-    public function add (Taintable $var) {
+    public function add (Variable $var) {
         $this->_variables[$var->getName()] = $var;
     }
 
-    public function getFromVariable (Expr\Variable $expr) {
-        if (isset($this->_variables[$expr->name])) {
-            return $this->_variables[$expr->name];
+    public function getVariable ($var) {
+        if (isset($this->_variables[$var])) {
+            return $this->_variables[$var];
         }
-
         return null;
+    }
+
+    public function hasVar ($var) {
+        return isset($this->_variables[$var]);
     }
 
     public function addFromConfig ($config) {
@@ -36,19 +39,26 @@ class Scope {
     }
 
     private function _taintableFromConfig_variable ($config) {
-        return new Taintable\Variable($config->name, $config->taint);
+        return new Variable($config->name, $config->taint);
     }
 
     private function _taintableFromConfig_array ($config) {
         $keys = [];
-        foreach ($config->keys as $key) {
-            $var = $this->_taintableFromConfig($key);
-            if ($var) {
-                $keys[$var->getName()] = $var;
+        if (isset($config->keys)) {
+            foreach ($config->keys as $key) {
+                $var = $this->_taintableFromConfig($key);
+                if ($var) {
+                    $keys[$var->getName()] = $var;
+                }
             }
         }
 
-        return new Taintable\Array_($config->name, $config->taint, $config->inherit, $keys);
+        $inherit = false;
+        if (isset($config->inherit)) {
+            $inherit = $config->inherit;
+        }
+
+        return new Variable\Array_($config->name, $config->taint, $inherit, $keys);
     }
 
     private $_variables;

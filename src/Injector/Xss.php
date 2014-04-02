@@ -2,7 +2,6 @@
 namespace Phulner\Injector;
 
 use PhpParser\Parser;
-use PhpParser\Lexer;
 use PhpParser\NodeTraverser;
 
 use Phulner\InjectorAbstract;
@@ -10,8 +9,9 @@ use Phulner\NodeVisitor\Tainter;
 use Phulner\NodeVisitor\Replacer;
 use Phulner\NodeVisitor\Scope;
 use Phulner\Function_\Sanitizer\Factory;
-use Phulner\Lexer\KeepOriginalValue as KeepOriginalValueLexer;
-use Phulner\PrettyPrinter\KeepOriginalValue as KeepOriginalValuePrettyPrinter;
+use Phulner\PhpParser\Lexer;
+use Phulner\PhpParser\PrettyPrinter;
+use Phulner\PhpParser\NodeDumper;
 
 class Xss extends InjectorAbstract {
     public function __construct () {
@@ -27,10 +27,10 @@ class Xss extends InjectorAbstract {
     }
 
     public function inject($code, $options) {
-        $nodeDumper = new \PhpParser\NodeDumper;
-        $prettyPrinter = new KeepOriginalValuePrettyPrinter;
+        $nodeDumper = new NodeDumper;
+        $prettyPrinter = new PrettyPrinter;
 
-        $parser = new Parser(new KeepOriginalValueLexer);
+        $parser = new Parser(new Lexer);
 
         $statements = $parser->parse("<?php\n" . $code);
 
@@ -43,9 +43,13 @@ class Xss extends InjectorAbstract {
 
         $statements = $traverser->traverse($statements);
 
-        var_dump($statements);
 
-        //echo $nodeDumper->dump($statements), "\n";
+
+        //print_r($statements);
+
+        //var_dump($statements);
+
+        echo $nodeDumper->dump($statements);
         //echo $prettyPrinter->prettyPrint($statements), "\n";
 
         $ret =        "// Phulner Injection start\n";

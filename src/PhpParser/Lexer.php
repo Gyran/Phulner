@@ -1,7 +1,7 @@
 <?php
-namespace Phulner\Lexer;
+namespace Phulner\PhpParser;
 
-class KeepOriginalValue extends \PhpParser\Lexer {
+class Lexer extends \PhpParser\Lexer {
     public function getNextToken(&$value = null, &$startAttributes = null, &$endAttributes = null) {
         $tokenId = parent::getNextToken($value, $startAttributes, $endAttributes);
 

@@ -4,10 +4,10 @@ namespace Phulner\NodeVisitor;
 use PhpParser\Node;
 use PhpParser\NodeVisitorAbstract;
 use PhpParser\Node\Expr;
+use PhpParser\Node\Scalar;
 
 use Phulner\Function_\Sanitizer\Factory;
-use Phulner\NodeVisitor\Scope;
-use Phulner\NodeVisitor\Scope\Taintable;
+use Phulner\NodeVisitor\Scope\Variable;
 
 class Tainter extends NodeVisitorAbstract {
 
@@ -58,7 +58,18 @@ class Tainter extends NodeVisitorAbstract {
         $taint = [];
 
         if ($node instanceof Expr\Variable) {
-            $var = $this->_currentScope->getFromVariable($node);
+            $var = $this->_currentScope->getVariable($node->name);
+            $node->scopeVar = $var;
+
+            if ($var) {
+                $taint = $var->getTaint();
+            }
+        } elseif ($node instanceof Expr\ArrayDimFetch) {
+            if ($node->dim instanceof Scalar\String) {
+                $var = $node->var->scopeVar->getKey($node->dim->value);
+            }
+
+            $node->scopeVar = $var;
             if ($var) {
                 $taint = $var->getTaint();
             }
@@ -68,7 +79,7 @@ class Tainter extends NodeVisitorAbstract {
 
             if ($node->var instanceof Expr\Variable) {
                 // If it is assigned to a Variable
-                $var = new Taintable\Variable($node->var->name, $taint);
+                $var = new Variable($node->var->name, $taint);
 
                 // Add the taint to the variable node
                 $node->var->taint = $taint;
@@ -87,7 +98,8 @@ class Tainter extends NodeVisitorAbstract {
     private function _returnsTaint (Expr $expr) {
         $taint = [];
         // Its a variable, return the variables taint
-        if ($expr instanceof Expr\Variable) {
+        if ($expr instanceof Expr\Variable ||
+            $expr instanceof Expr\ArrayDimFetch) {
             $taint = $expr->taint;
         } elseif ($expr instanceof Expr\Assign) {
             $taint = $this->_returnsTaint($expr->var);

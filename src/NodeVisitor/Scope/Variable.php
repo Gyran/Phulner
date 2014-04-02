@@ -1,7 +1,12 @@
 <?php
 namespace Phulner\NodeVisitor\Scope;
 
-abstract class TaintableAbstract implements Taintable {
+class Variable {
+    public function __construct($name, $taint = []) {
+        $this->_name = $name;
+        $this->_taint = $taint;
+    }
+
     public function getName () {
         return $this->_name;
     }

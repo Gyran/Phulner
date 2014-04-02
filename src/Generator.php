@@ -61,7 +61,9 @@ class Generator {
                     $partConfig = $part->getConfig();
                     $identifier = $partConfig->identifier;
 
-                    if (isset($this->_vulnerabilities->$identifier)) {
+                    $vulnerability = $this->_getVulnerability($identifier);
+
+                    if ($vulnerability) {
                         $injector = $vulnerabilityConfigs[$identifier]->getInjector($partConfig);
 
                         $injectedCode = $injector->inject($part->getCode(), $this->_vulnerabilities->$identifier);
@@ -84,6 +86,8 @@ class Generator {
                         //echo $identifier, " isset\n";
 
                         $newFile->addPart($injectedPart);
+                    } else {
+                        $newFile->addPart($part);
                     }
 
                     //print_r($vulnerabilityConfigs[$config->identifier]);
@@ -96,11 +100,11 @@ class Generator {
                 }
 
             }
-
+            /*
             echo "File: ", $newFile->getPath(), "\n";
             echo $newFile->toString();
             echo "========\n";
-
+            */
             $newFiles[] = $newFile;
         }
 
@@ -118,6 +122,13 @@ class Generator {
         */
 
         //$this->_project
+    }
+
+    private function _getVulnerability ($identifier) {
+        if (isset($this->_vulnerabilities->$identifier) && $this->_vulnerabilities->$identifier->inject) {
+            return $this->_vulnerabilities->$identifier;
+        }
+        return null;
     }
 
     private $_project;
