@@ -2,35 +2,35 @@
 namespace Phulner\NodeVisitor;
 
 use Phulner\NodeVisitor\Scope\Variable;
+use Phulner\NodeVisitor\Scope\VariableAbstract;
 
 use PhpParser\Node\Expr;
 
 class Scope {
-    public function add (Variable $var) {
+    public function addVariable (VariableAbstract $var) {
+        echo "addar ", $var->getName(), " som är en ", $var->getType(), "\n";
         $this->_variables[$var->getName()] = $var;
     }
 
-    public function getVariable ($var) {
-        if (isset($this->_variables[$var])) {
-            return $this->_variables[$var];
-        }
-        return null;
+    public function hasVariable ($name) {
+        return isset($this->_variables[$name]);
     }
 
-    public function hasVar ($var) {
-        return isset($this->_variables[$var]);
+    public function &getVariable ($name) {
+        return $this->_variables[$name];
     }
 
     public function addFromConfig ($config) {
-        $var = $this->_taintableFromConfig($config);
+        $var = $this->_variableFromConfig($config);
+
 
         if ($var) {
             $this->_variables[$var->getName()] = $var;
         }
     }
 
-    private function _taintableFromConfig ($config) {
-        $method = "_taintableFromConfig_" . $config->type;
+    private function _variableFromConfig ($config) {
+        $method = "_variableFromConfig_" . $config->type;
         if (method_exists($this, $method)) {
             return $this->$method($config);
         }
@@ -38,15 +38,15 @@ class Scope {
         return null;
     }
 
-    private function _taintableFromConfig_variable ($config) {
-        return new Variable($config->name, $config->taint);
+    private function _variableFromConfig_variable ($config) {
+        return new Variable\Variable($config->name, $config->taint);
     }
 
-    private function _taintableFromConfig_array ($config) {
+    private function _variableFromConfig_array ($config) {
         $keys = [];
         if (isset($config->keys)) {
             foreach ($config->keys as $key) {
-                $var = $this->_taintableFromConfig($key);
+                $var = $this->_variableFromConfig($key);
                 if ($var) {
                     $keys[$var->getName()] = $var;
                 }

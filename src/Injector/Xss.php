@@ -7,6 +7,7 @@ use PhpParser\NodeTraverser;
 use Phulner\InjectorAbstract;
 use Phulner\NodeVisitor\Tainter;
 use Phulner\NodeVisitor\Replacer;
+use Phulner\NodeVisitor\Scoper;
 use Phulner\NodeVisitor\Scope;
 use Phulner\Function_\Sanitizer\Factory;
 use Phulner\PhpParser\Lexer;
@@ -36,10 +37,13 @@ class Xss extends InjectorAbstract {
 
         $traverser = new NodeTraverser;
 
-        $tainter = new Tainter($this->_initialScope, $this->_sanitationFunctionsFactory, $options);
-        $traverser->addVisitor($tainter);
+        $scoper = new Scoper($this->_initialScope, $options);
+        $traverser->addVisitor($scoper);
+
+        $tainter = new Tainter($this->_sanitationFunctionsFactory, $options);
+        //$traverser->addVisitor($tainter);
         $replacer = new Replacer($this->_sanitationFunctionsFactory, $options);
-        $traverser->addVisitor($replacer);
+        //$traverser->addVisitor($replacer);
 
         $statements = $traverser->traverse($statements);
 

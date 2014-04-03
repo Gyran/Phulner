@@ -11,18 +11,13 @@ use Phulner\NodeVisitor\Scope\Variable;
 
 class Tainter extends NodeVisitorAbstract {
 
-    public function __construct(Scope $initialScope, Factory $factory, $options) {
-        $this->setInitialScope($initialScope);
+    public function __construct(Factory $factory, $options) {
         $this->setSanitationFunctionFactory($factory);
         $this->setOptions($options);
     }
 
     public function setOptions ($options) {
         $this->_options = $options;
-    }
-
-    public function setInitialScope (Scope $initialScope) {
-        $this->_initialScope = $initialScope;
     }
 
     public function setSanitationFunctionFactory (Factory $factory) {
@@ -38,7 +33,7 @@ class Tainter extends NodeVisitorAbstract {
     }
 
     public function afterTraverse (array $nodes) {
-        //print_r($this->_currentScope);
+        print_r($this->_currentScope);
     }
 
     public $white;
@@ -48,6 +43,11 @@ class Tainter extends NodeVisitorAbstract {
 
         //$this->white .= "    ";
 
+        $method = "_enterNode_" . $node->getType();
+        if (method_exists($this, $method)) {
+            return $this->$method($node);
+        }
+
         // add taint properties to all nodes
         $node->taint = [];
     }
@@ -55,10 +55,15 @@ class Tainter extends NodeVisitorAbstract {
     public function leaveNode (Node $node) {
         //$this->white = substr($this->white, 4);
         //echo $this->white . "leaving node ", get_class($node), "\n";
-        $taint = [];
+        //$taint = [];
 
-        if ($node instanceof Expr\Variable) {
-            $var = $this->_currentScope->getVariable($node->name);
+        $method = "_leaveNode_" . $node->getType();
+        if (method_exists($this, $method)) {
+            return $this->$method($node);
+        }
+
+        /*if ($node instanceof Expr\Variable) {
+            $var = &$this->_currentScope->getVariable($node->name);
             $node->scopeVar = $var;
 
             if ($var) {
@@ -84,7 +89,11 @@ class Tainter extends NodeVisitorAbstract {
                 // Add the taint to the variable node
                 $node->var->taint = $taint;
                 // And save it to the current scope
-                $this->_currentScope->add($var);
+                $this->_currentScope->addVariable($var);
+                $node->var->scopeVar = $this->_currentScope->getVariable($var->getName());
+            } elseif ($node->var instanceof Expr\ArrayDimFetch) {
+                $var = new Variable($node->var->dim)
+                $node->var->scopeVar = $var;
             }
         } elseif ($node instanceof Node\Arg) {
             $taint = $this->_returnsTaint($node->value);
@@ -92,6 +101,23 @@ class Tainter extends NodeVisitorAbstract {
             $taint = $this->_returnsTaint($node);
         }
 
+        $node->taint = $taint;*/
+    }
+
+    private function _enterNode_Expr_ArrayDimFetch (Node $node) {
+        if (!isset($node->scopeVar)) {
+            // this is the root dim fetch
+        }
+    }
+
+    private function _leaveNode_Expr_Variable (Node $node) {
+        $node->taint = $node->scopeVar->getTaint();
+    }
+
+    private function _leaveNode_Expr_Assign (Node $node) {
+        $taint = $node->expr->taint;
+        $node->var->scopeVar->setTaint($taint);
+        $node->var->taint = $taint;
         $node->taint = $taint;
     }
 
@@ -131,7 +157,7 @@ class Tainter extends NodeVisitorAbstract {
         $expr->removesTaint = false;
     }
 
-    private $_initialScope;
+    //private $_initialScope;
     private $_sanitationFunctionFactory;
     private $_options;
 

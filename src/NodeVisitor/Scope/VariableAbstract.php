@@ -1,14 +1,22 @@
 <?php
 namespace Phulner\NodeVisitor\Scope;
 
-class Variable {
+abstract class VariableAbstract {
     public function __construct($name, $taint = []) {
         $this->_name = $name;
         $this->_taint = $taint;
     }
 
+    public function getType () {
+        return get_class($this);
+    }
+
     public function getName () {
         return $this->_name;
+    }
+
+    public function setName ($name) {
+        $this->_name = $name;
     }
 
     public function getTaint () {

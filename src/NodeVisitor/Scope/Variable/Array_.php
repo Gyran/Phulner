@@ -1,30 +1,26 @@
 <?php
 namespace Phulner\NodeVisitor\Scope\Variable;
 
-use Phulner\NodeVisitor\Scope\Variable;
+use Phulner\NodeVisitor\Scope\VariableAbstract;
 
-class Array_ extends Variable {
+class Array_ extends VariableAbstract {
     public function __construct($name, $taint = [], $inherit = false, $keys = []) {
+        echo $name, "skapas!\n";
         parent::__construct($name, $taint);
         $this->_inherit = $inherit;
         $this->_keys = $keys;
     }
 
-    public function addKey ($key, Variable $var) {
-        $this->_keys[$key] = $var;
+    public function hasKey ($key) {
+        return isset($this->_keys[$key]);
     }
 
-    public function getKey ($key) {
-        if (isset($this->_keys[$key])) {
-            return $this->_keys[$key];
-        }
-        // $key does not exist create it!
-        $var = new Array_($key, $this->getTaint(), true);
-        $this->addKey($key, $var);
+    public function addKey (VariableAbstract $var) {
+        $this->_keys[$var->getName()] = $var;
+    }
 
-        return $var;
-
-        //throw new \OutOfBoundsException(sprintf("Key [%s] could not be accessed", $key));
+    public function &getKey ($key) {
+        return $this->_keys[$key];
     }
 
     public function getTaint () {
@@ -34,8 +30,11 @@ class Array_ extends Variable {
         return [];
     }
 
+    public function getInherit () {
+        return $this->_inherit;
+    }
+
     protected $_keys;
     protected $_inherit;
 }
-
 ?>
