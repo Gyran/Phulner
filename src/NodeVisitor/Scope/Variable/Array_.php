@@ -5,7 +5,6 @@ use Phulner\NodeVisitor\Scope\VariableAbstract;
 
 class Array_ extends VariableAbstract {
     public function __construct($name, $taint = [], $inherit = false, $keys = []) {
-        echo $name, "skapas!\n";
         parent::__construct($name, $taint);
         $this->_inherit = $inherit;
         $this->_keys = $keys;
@@ -15,12 +14,13 @@ class Array_ extends VariableAbstract {
         return isset($this->_keys[$key]);
     }
 
-    public function addKey (VariableAbstract $var) {
+    public function addKey (VariableAbstract &$var) {
         $this->_keys[$var->getName()] = $var;
     }
 
     public function &getKey ($key) {
-        return $this->_keys[$key];
+        $var = &$this->_keys[$key];
+        return $var;
     }
 
     public function getTaint () {
@@ -28,6 +28,10 @@ class Array_ extends VariableAbstract {
             return parent::getTaint();
         }
         return [];
+    }
+
+    public function getKeys () {
+        return $this->_keys;
     }
 
     public function getInherit () {

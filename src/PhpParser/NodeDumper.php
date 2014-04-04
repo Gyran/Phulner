@@ -26,6 +26,8 @@ class NodeDumper extends \PhpParser\NodeDumper {
             }
             $r .= "\n    taint: ";
             $r .= str_replace("\n", "\n    ", parent::dump($node->getTaint()));
+            $r .= "\n    keys: ";
+            $r .= str_replace("\n", "\n    ", parent::dump($node->getKeys()));
         } else {
             try {
                 $r = parent::dump($node);

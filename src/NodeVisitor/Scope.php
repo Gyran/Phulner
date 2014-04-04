@@ -7,9 +7,9 @@ use Phulner\NodeVisitor\Scope\VariableAbstract;
 use PhpParser\Node\Expr;
 
 class Scope {
-    public function addVariable (VariableAbstract $var) {
-        echo "addar ", $var->getName(), " som är en ", $var->getType(), "\n";
-        $this->_variables[$var->getName()] = $var;
+    public function addVariable (VariableAbstract &$var) {
+        //echo "addar ", $var->getName(), " som är en ", $var->getType(), "\n";
+        $this->_variables[$var->getName()] = &$var;
     }
 
     public function hasVariable ($name) {
@@ -17,7 +17,8 @@ class Scope {
     }
 
     public function &getVariable ($name) {
-        return $this->_variables[$name];
+        $var = &$this->_variables[$name];
+        return $var;
     }
 
     public function addFromConfig ($config) {

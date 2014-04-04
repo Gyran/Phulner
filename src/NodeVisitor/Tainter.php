@@ -3,8 +3,6 @@ namespace Phulner\NodeVisitor;
 
 use PhpParser\Node;
 use PhpParser\NodeVisitorAbstract;
-use PhpParser\Node\Expr;
-use PhpParser\Node\Scalar;
 
 use Phulner\Function_\Sanitizer\Factory;
 use Phulner\NodeVisitor\Scope\Variable;
@@ -25,11 +23,7 @@ class Tainter extends NodeVisitorAbstract {
     }
 
     public function beforeTraverse (array $nodes) {
-        $this->white = "";
-        unset($this->_scopes);
-        $this->_scopes = new \SplStack();
 
-        $this->_currentScope = $this->_initialScope;
     }
 
     public function afterTraverse (array $nodes) {
@@ -61,6 +55,9 @@ class Tainter extends NodeVisitorAbstract {
         if (method_exists($this, $method)) {
             return $this->$method($node);
         }
+
+        echo "Missing method " . $method, "\n";
+
 
         /*if ($node instanceof Expr\Variable) {
             $var = &$this->_currentScope->getVariable($node->name);
@@ -104,24 +101,39 @@ class Tainter extends NodeVisitorAbstract {
         $node->taint = $taint;*/
     }
 
-    private function _enterNode_Expr_ArrayDimFetch (Node $node) {
-        if (!isset($node->scopeVar)) {
-            // this is the root dim fetch
-        }
+    private function _leaveNode_Arg (Node\Arg $node) {
+        $node->taint = $node->value->taint;
     }
 
-    private function _leaveNode_Expr_Variable (Node $node) {
+    private function _leaveNode_Expr_FuncCall (Node\Expr\FuncCall $node) {
+        $node->taint = $this->_returnsTaint($node);
+    }
+
+    private function _leaveNode_Expr_ArrayDimFetch (Node\Expr\ArrayDimFetch $node) {
+        //if (!isset($node->scopeVar)) {
+            // this is the root dim fetch
+        //}
         $node->taint = $node->scopeVar->getTaint();
     }
 
-    private function _leaveNode_Expr_Assign (Node $node) {
+    private function _leaveNode_Expr_Variable (Node\Expr\Variable $node) {
+        $node->taint = $node->scopeVar->getTaint();
+    }
+
+    private function _leaveNode_Expr_Assign (Node\Expr\Assign $node) {
         $taint = $node->expr->taint;
         $node->var->scopeVar->setTaint($taint);
         $node->var->taint = $taint;
         $node->taint = $taint;
     }
 
-    private function _returnsTaint (Expr $expr) {
+    private function _returnsTaint (Node\Expr $expr) {
+        $method = "_returnsTaint_" . $expr->getType();
+        if (method_exists($this, $method)) {
+            return $this->$method($expr);
+        }
+        echo $method, "\n";
+        return [];
         $taint = [];
         // Its a variable, return the variables taint
         if ($expr instanceof Expr\Variable ||
@@ -151,6 +163,26 @@ class Tainter extends NodeVisitorAbstract {
         //echo get_class($expr), "\n";
         return $taint;
 
+    }
+
+    private function _returnsTaint_Expr_FuncCall (Node\Expr\FuncCall $node) {
+        echo "kommer denna returna taint?\n";
+        $functionName = $node->name->toString();
+        $sanitizer = $this->_getSanitizer($functionName);
+        if ($sanitizer) {
+            if ($sanitizer->taintedInput($node, $this->_options)) {
+                echo "funcall returns taint!\n";
+                print_r($sanitizer->returnedTaint($node, $this->_options));
+                return $sanitizer->returnedTaint($node, $this->_options);
+            }
+        }
+    }
+
+    private function _getSanitizer ($name) {
+        if ($this->_sanitationFunctionFactory->exists($name)) {
+            return $this->_sanitationFunctionFactory->get($name);
+        }
+        return null;
     }
 
     private function _removesTaint (Expr $expr) {

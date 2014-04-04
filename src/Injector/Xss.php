@@ -41,9 +41,9 @@ class Xss extends InjectorAbstract {
         $traverser->addVisitor($scoper);
 
         $tainter = new Tainter($this->_sanitationFunctionsFactory, $options);
-        //$traverser->addVisitor($tainter);
+        $traverser->addVisitor($tainter);
         $replacer = new Replacer($this->_sanitationFunctionsFactory, $options);
-        //$traverser->addVisitor($replacer);
+        $traverser->addVisitor($replacer);
 
         $statements = $traverser->traverse($statements);
 
