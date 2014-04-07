@@ -15,8 +15,10 @@ use Phulner\PhpParser\PrettyPrinter;
 use Phulner\PhpParser\NodeDumper;
 
 class Xss extends InjectorAbstract {
-    public function __construct () {
+    const DEFAULT_METHOD = "tainting";
 
+    public function __construct () {
+        $this->_method = self::DEFAULT_METHOD;
     }
 
     public function setSanitationFunctionsFactory (Factory $factory) {
@@ -27,7 +29,26 @@ class Xss extends InjectorAbstract {
         $this->_initialScope = $scope;
     }
 
+    public function setMethod ($method) {
+        $this->_method = $method;
+    }
+
     public function inject($code, $options) {
+        $injectMethod = $this->_method;
+        if (isset($options->method)) {
+            $injectMethod = $options->method;
+        }
+
+        $method = "inject_" . $injectMethod;
+
+        if (method_exists($this, $method)) {
+            return $this->$method($code, $options);
+        }
+
+        throw new \Exception(sprintf("Method %s not defined", $method));
+    }
+
+    public function inject_tainting ($code, $options) {
         $nodeDumper = new NodeDumper;
         $prettyPrinter = new PrettyPrinter;
 
@@ -56,7 +77,7 @@ class Xss extends InjectorAbstract {
         echo $nodeDumper->dump($statements);
         //echo $prettyPrinter->prettyPrint($statements), "\n";
 
-        $ret =        "// Phulner Injection start\n";
+        $ret =        "// Phulner Injection start (tainting)\n";
         $ret = $ret . "/* Old code:\n";
         $ret = $ret . $code . "*/\n";
         $ret = $ret . $prettyPrinter->prettyPrint($statements) . "\n";
@@ -64,9 +85,18 @@ class Xss extends InjectorAbstract {
         return  $ret;
     }
 
+    public function inject_removeing ($code, $options) {
+        $ret =      "// Phulner Injection start (removeing)\n";
+        $ret = $ret . "/* Old code:\n";
+        $ret = $ret . $code . "*/\n";
+        $ret = $ret . "// Phulner Injection end\n";
+        return $ret;
+    }
+
 
     private $_sanitationFunctionsFactory;
     private $_initialScope;
+    private $_method;
 }
 
 ?>
