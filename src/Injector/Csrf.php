@@ -23,7 +23,7 @@ class Csrf extends InjectorAbstract {
         return  $ret;
     }
 
-    private function _action_check ($code, $options) {
+    private function _action_guard ($code, $options) {
         if ($options->type === "NONE") {
             return "";
         }
@@ -36,13 +36,36 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 CODE;
             return $ret;
         }
+        if ($options->type === "COMPUTABLE") {
+            $ret =
+<<<'CODE'
+if ($_POST["phulner_csrf_token"] !== md5(date("Y-m-d"))) {
+    die();
+}
+CODE;
+            return $ret;
+        }
     }
 
     private function _action_generate ($code, $options) {
+        if ($options->type === "COMPUTABLE") {
+            $ret =
+<<<'CODE'
+$phulner_csrf_token = md5(date("Y-m-d"));
+CODE;
+            return $ret;
+        }
         return "";
     }
 
     private function _action_include ($code, $options) {
+        if ($options->type === "COMPUTABLE") {
+            $ret =
+<<<'CODE'
+echo "<input type='hidden' name='phulner_csrf_token' value='", $phulner_csrf_token, "'>";
+CODE;
+            return $ret;
+        }
         return "";
     }
 
