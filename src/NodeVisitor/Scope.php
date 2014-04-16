@@ -8,7 +8,6 @@ use PhpParser\Node\Expr;
 
 class Scope {
     public function addVariable (VariableAbstract &$var) {
-        //echo "addar ", $var->getName(), " som är en ", $var->getType(), "\n";
         $this->_variables[$var->getName()] = &$var;
     }
 

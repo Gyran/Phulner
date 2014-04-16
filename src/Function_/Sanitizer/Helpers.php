@@ -38,7 +38,6 @@ class Helpers {
     //// returns taint from argument number $num
     public function return_taintFromArgument($num) {
         return function (Node\Expr\FuncCall $funcCall, $options) use ($num) {
-            print_r($funcCall->args[$num]->taint);
             return $funcCall->args[$num]->taint;
         };
     }

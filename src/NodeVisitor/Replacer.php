@@ -31,7 +31,7 @@ class Replacer extends NodeVisitorAbstract {
             $sanitizer = $this->_sanitationFunctionFactory->get($functionName);
 
             $newNode = $sanitizer->replace($node, $this->_options);
-            echo "replejsar" , $node->name ,"\n";
+            echo stringColor(sprintf("Replacing function %s\n", $functionName), "1;32");
             return $newNode;
         }
 

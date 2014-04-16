@@ -53,7 +53,6 @@ class Project {
     }
 
     public function requireFile ($file) {
-        //echo $this->path($file), "\n";
         return require $this->path($file);
     }
 
@@ -73,26 +72,12 @@ class Project {
         return $this->_path . $sub;
     }
 
-
-/*
-    public function parse () {
-        $vul = $this->_vulnerabilityConfigs["xss1"];
-        $files = $vul->getFiles();
-
-        $file = $this->_parser->parse($this->_path . $files[0]);
-        //print_r($file);
-        echo $file->toString();
-
-    }
-*/
-
     private $_name;
     private $_vulnerabilityConfigs;
     private $_path;
     private $_affectedFiles;
     private $_files;
     private $_basedir;
-    //private $_config;
 }
 
 

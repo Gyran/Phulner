@@ -30,8 +30,7 @@ class Scoper extends NodeVisitorAbstract {
     }
 
     public function afterTraverse (array $nodes) {
-        //echo "scope:\n";
-        //print_r($this->_currentScope);
+
     }
 
     public function enterNode (Node $node) {
@@ -54,7 +53,6 @@ class Scoper extends NodeVisitorAbstract {
         }
         $scopeVar = &$this->_currentScope->getVariable($node->name);
         $node->scopeVar = $scopeVar;
-//        print_r($node);
     }
 
     private function _enterNode_Expr_ArrayDimFetch (Node\Expr\ArrayDimFetch $node) {
@@ -197,10 +195,6 @@ class Scoper extends NodeVisitorAbstract {
             }
         }
 
-
-        //throw new \Exception(sprintf("Can not convert %s to value", $node->getType()));
-
-
         return false;
     }
 
@@ -211,7 +205,6 @@ class Scoper extends NodeVisitorAbstract {
         }
 
         return false;
-        //throw new \Exception(sprintf("Can't convert %s to a Variable", $node->getType()));
     }
 
     private function &_varGetByNode (Node $node) {
@@ -228,8 +221,6 @@ class Scoper extends NodeVisitorAbstract {
     private function &_varGetByNode_Expr_ArrayDimFetch (Node\Expr\ArrayDimFetch $node) {
         $key = $this->_nodeToValue($node->dim);
         $var = $node->var->scopeVar;
-
-        //echo sprintf("_varGetByNode nodevar [%s] node [%s]", $var->getName(), $node->getType());
 
         if ($key === false) {
             throw new \Exception("could not get key");
@@ -252,34 +243,9 @@ class Scoper extends NodeVisitorAbstract {
         $var = &$var->getKey($key);
 
         return $var;
-
-        return;
-        //echo "getting key [", $key, "], var is [", $var->getType(), "] and [", $var->getName(), "\n";
-
-        if (!($var instanceof Variable\Array_)) {
-            return $var;
-        }
-
-        if ($key === false) {
-            throw new \Exception("could not get key");
-        }
-
-        // check if key exists, if not: create it
-        if (!$var->hasKey($key)) {
-            if ($var->getInherit()) {
-                $var->addKey(new Variable\Array_($key, $var->getTaint(), true));
-            } else {
-                $var->addKey(new Variable\Array_($key));
-            }
-        }
-        $var = &$var->getKey($key);
-
-        return $var;
-        //return $this->_varGetByNode($var, $node->var);
     }
 
     private function &_varGetByNode_Expr_Variable (VariableAbstract $var, Node\Expr\Variable $node) {
-        //echo "getting var [", $node->name, "], var is [", $var->getType(), "] and [", $var->getName(), "\n";
         if ($var instanceof Variable\Array_) {
             $var = &$var->getKey($node->name);
             return $var;

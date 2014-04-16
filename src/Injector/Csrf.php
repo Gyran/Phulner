@@ -6,7 +6,7 @@ use Phulner\InjectorAbstract;
 class Csrf extends InjectorAbstract {
     public function __construct($action) {
         $method = "_action_" . $action;
-        print_r($method);
+
         if (method_exists($this, $method)) {
             $this->_method = $method;
         } else {
@@ -33,7 +33,6 @@ class Csrf extends InjectorAbstract {
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     die();
 }
-
 CODE;
             return $ret;
         }
