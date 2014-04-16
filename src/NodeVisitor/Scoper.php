@@ -30,8 +30,8 @@ class Scoper extends NodeVisitorAbstract {
     }
 
     public function afterTraverse (array $nodes) {
-        echo "scope:\n";
-        print_r($this->_currentScope);
+        //echo "scope:\n";
+        //print_r($this->_currentScope);
     }
 
     public function enterNode (Node $node) {

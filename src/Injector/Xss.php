@@ -74,7 +74,7 @@ class Xss extends InjectorAbstract {
 
         //var_dump($statements);
 
-        echo $nodeDumper->dump($statements);
+        //echo $nodeDumper->dump($statements);
         //echo $prettyPrinter->prettyPrint($statements), "\n";
 
         $ret =        "// Phulner Injection start (tainting)\n";

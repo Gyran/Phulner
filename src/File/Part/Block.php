@@ -8,6 +8,10 @@ class Block extends PartAbstract {
         $this->_lines = $lines;
     }
 
+    public function getType () {
+        return "Block";
+    }
+
     public function toString () {
         return $this->_lines;
     }

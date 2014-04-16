@@ -6,6 +6,10 @@ class Project {
         return $this->_affectedFiles;
     }
 
+    public function getVulnerabilityConfig ($identifier) {
+        return $this->_vulnerabilityConfigs[$identifier];
+    }
+
     public function getVulnerabilityConfigs () {
         return $this->_vulnerabilityConfigs;
     }
@@ -22,6 +26,9 @@ class Project {
     public function addConfig ($config) {
         $this->_vulnerabilityConfigs = [];
         $this->_name = $config->name;
+        if (isset($config->basedir)) {
+            $this->_basedir = $config->basedir;
+        }
 
         foreach ($config->vulnerabilities as $identifier => $vulnerabilityConfig) {
             $this->addVulnerabilityConfig($identifier, $vulnerabilityConfig);
@@ -32,7 +39,7 @@ class Project {
     public function addVulnerabilityConfig ($identifier, $config) {
         $configClass = "Phulner\\Vulnerability\\Config\\" . ucfirst($config->type);
         if (class_exists($configClass)) {
-            $this->_vulnerabilityConfigs[$identifier] = new $configClass($identifier, $config);
+            $this->_vulnerabilityConfigs[$identifier] = new $configClass($identifier, $config, $this);
             $this->_affectedFiles = array_merge($this->_affectedFiles, $this->_vulnerabilityConfigs[$identifier]->getFiles());
         }
     }
@@ -45,12 +52,21 @@ class Project {
         $this->addConfig($config);
     }
 
+    public function requireFile ($file) {
+        //echo $this->path($file), "\n";
+        return require $this->path($file);
+    }
+
     public function parseFiles () {
         $parser = new Parser;
 
         foreach ($this->_affectedFiles as $file) {
-            $this->_files[$file] = $parser->parse($this->path($file));
+            $this->_files[$file] = $parser->parse($this->basePath($file), $file);
         }
+    }
+
+    public function basePath ($sub = "") {
+        return $this->path($this->_basedir . $sub);
     }
 
     public function path ($sub = "") {
@@ -75,6 +91,7 @@ class Project {
     private $_path;
     private $_affectedFiles;
     private $_files;
+    private $_basedir;
     //private $_config;
 }
 

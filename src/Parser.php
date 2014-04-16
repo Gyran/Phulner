@@ -7,11 +7,11 @@ use Phulner\File;
 use Phulner\File\Part;
 
 class Parser {
-    public function parse($path) {
+    public function parse($fullPath, $path) {
         $this->beforeParse();
 
         $this->_file = new File($path);
-        $fh = fopen($path, "r");
+        $fh = fopen($fullPath, "r");
 
         while (($line = fgets($fh)) !== false) {
             $this->_state->line($line, $this);

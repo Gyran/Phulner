@@ -1,7 +1,7 @@
 <?php
 namespace Phulner;
 
-use Phulner\File\PartAbstract;
+use Phulner\File\Part;
 
 class File implements \IteratorAggregate {
     public function __construct ($path) {
@@ -13,7 +13,7 @@ class File implements \IteratorAggregate {
         return $this->_path;
     }
 
-    public function addPart (PartAbstract $part) {
+    public function addPart (Part $part) {
         $this->_parts[] = $part;
     }
 

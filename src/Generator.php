@@ -12,23 +12,27 @@ class Generator {
     }
 
     public function fromConfig($config) {
-        $projectPath = $config->project . "/";
+        $projectPath = $config->project;
+        if (!is_dir($projectPath)) {
+            die(stringColor(sprintf("No project found at %s\n", $projectPath), "0;31"));
+        }
         $project = new Project($projectPath);
         $project->configFromFile();
         $this->addProject($project);
 
-        /*$vulnerabilityConfigs = $this->_project->getVulnerabilityConfigs();
-        $this->_project->parseFiles();
-        $files = $this->_project->getFiles();*/
-
         $this->_vulnerabilities = $config->vulnerabilities;
 
-        $this->_outPath = $config->out . "/";
+        $this->setOutPath($config->out);
+    }
 
-        //foreach ($config->vulnerabilities as $vulnerability) {
+    public function setOutPath ($path) {
+        if (!is_dir($path)) {
+            if (!mkdir($path, 0777, true)) {
+                die(stringColor(sprintf("Can't create output path %s\n", $path), "0;31"));
+            }
+        }
 
-        //}
-
+        $this->_outPath = $path;
     }
 
     public function addProject (Project $project) {
@@ -39,89 +43,68 @@ class Generator {
         $this->_vulnerabilities[] = $vulnerability;
     }
 
-    public function wutwut () {
+    public function generate () {
+        $source = $this->_project->basePath();
+        $destination = $this->_outPath;
+        echo stringColor("Copying project to " . $destination . "\n", "1;34");
+        $copyCommand = "cp -r '" . $this->_project->basePath() . "'* '" . $this->_outPath . "'";
+        exec($copyCommand);
+
         $this->_project->parseFiles();
         $files = $this->_project->getFiles();
-        $vulnerabilityConfigs = $this->_project->getVulnerabilityConfigs();
-
-        $newFiles = [];
-
-        //print_r($files["input.php"]->toString());
 
         foreach ($files as $file) {
-            /*if ($file->getPath() != "test/output.php") {
-                continue;
-            }*/
+            $newFile = $this->_handleFile($file);
+            $this->_writeFile($this->_outPath, $newFile);
+        }
+    }
 
-            $newFile = new File($file->getPath());
+    private function _handleFile (File $file) {
+        $newFile = new File($file->getPath());
 
-            foreach ($file as $part) {
-                //echo get_class($part), "\n";
-                if ($part instanceof Part\Vulnerability) {
-                    $partConfig = $part->getConfig();
-                    $identifier = $partConfig->identifier;
-
-                    $vulnerability = $this->_getVulnerability($identifier);
-
-                    if ($vulnerability) {
-                        $injector = $vulnerabilityConfigs[$identifier]->getInjector($partConfig);
-
-                        $injectedCode = $injector->inject($part->getCode(), $this->_vulnerabilities->$identifier);
-
-                        //echo "injectedPart:\n";
-                        //echo $injectedCode, "\n";
-
-                        $injectedPart = new Part\Block($injectedCode);
-
-
-                        /*$injector = new Injector\Xss;
-                        $injector->setSanitationFunctionsFactory(new SanitationFunction\Factory);
-
-                        print_r($config);
-
-                        $injector->inject($part->getCode(), $this->_vulnerabilities->$identifier);
-                        */
-                        //print_r($vulnerabilityConfigs[$identifier]);
-
-                        //echo $identifier, " isset\n";
-
-                        $newFile->addPart($injectedPart);
-                    } else {
-                        $newFile->addPart($part);
-                    }
-
-                    //print_r($vulnerabilityConfigs[$config->identifier]);
-
-
-                    //echo "is code\n";
-                    //print_r($part->getConfig());
-                } else {
-                    $newFile->addPart($part);
-                }
-
-            }
-            /*
-            echo "File: ", $newFile->getPath(), "\n";
-            echo $newFile->toString();
-            echo "========\n";
-            */
-            $newFiles[] = $newFile;
+        foreach ($file as $part) {
+            $newPart = $this->_handlePart($part);
+            $newFile->addPart($newPart);
         }
 
-        foreach ($newFiles as $file) {
-            $outPath = $this->_outPath . $file->getPath();
-            @mkdir(dirname($outPath));
-            file_put_contents($outPath, $file->toString());
+        return $newFile;
+    }
+
+    private function _handlePart (Part $part) {
+        $method = "_handlePart_" . $part->getType();
+        if (method_exists($this, $method)) {
+            return $this->$method($part);
+        }
+        throw new \Exception(sprintf("Can't handle part type %s", $part->getType()));
+    }
+
+    private function _handlePart_Vulnerability (Part\Vulnerability $part) {
+        $partConfig = $part->getConfig();
+        $vulnerability = $this->_getVulnerability($partConfig->identifier);
+
+        if ($vulnerability === null) { // shall not be injected
+            $newPart = new Part\Block($part->toString());
+            return $newPart;
         }
 
+        $vulnerabilityConfig = $this->_project->getVulnerabilityConfig($partConfig->identifier);
 
-        /*
-        foreach ($this->_vulnerabilities as $vulnerability) {
-            print_r($vulnerability);
-        }
-        */
+        $injector = $vulnerabilityConfig->getInjector($partConfig);
 
-        //$this->_project
+        $injectedCode = $injector->inject($part->getCode(), $vulnerability);
+
+        $newPart = new Part\Block($injectedCode);
+
+        return $newPart;
+    }
+
+    private function _handlePart_Block (Part\Block $part) {
+        return $part;
+    }
+
+    private function _writeFile ($path, $file) {
+        echo stringColor("writing file " . $file->getPath() . "\n", "1;34");
+        file_put_contents($path . $file->getPath(), $file->toString());
     }
 
     private function _getVulnerability ($identifier) {

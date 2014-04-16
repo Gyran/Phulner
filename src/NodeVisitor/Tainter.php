@@ -31,20 +31,22 @@ class Tainter extends NodeVisitorAbstract {
     }
 
     public $white;
-
+    /*
     public function enterNode (Node $node) {
         //echo $this->white . "entering node ", get_class($node), "\n";
 
         //$this->white .= "    ";
 
+        $node->taint = [];
         $method = "_enterNode_" . $node->getType();
         if (method_exists($this, $method)) {
             return $this->$method($node);
         }
+        echo stringColor("Missing method " . $method . "\n", "1;31");
 
         // add taint properties to all nodes
-        $node->taint = [];
     }
+    */
 
     public function leaveNode (Node $node) {
         //$this->white = substr($this->white, 4);
@@ -55,8 +57,7 @@ class Tainter extends NodeVisitorAbstract {
         if (method_exists($this, $method)) {
             return $this->$method($node);
         }
-
-        echo "Missing method " . $method, "\n";
+        echo stringColor("Missing method " . $method . "\n", "1;31");
 
 
         /*if ($node instanceof Expr\Variable) {
@@ -110,9 +111,6 @@ class Tainter extends NodeVisitorAbstract {
     }
 
     private function _leaveNode_Expr_ArrayDimFetch (Node\Expr\ArrayDimFetch $node) {
-        //if (!isset($node->scopeVar)) {
-            // this is the root dim fetch
-        //}
         $node->taint = $node->scopeVar->getTaint();
     }
 
@@ -166,13 +164,13 @@ class Tainter extends NodeVisitorAbstract {
     }
 
     private function _returnsTaint_Expr_FuncCall (Node\Expr\FuncCall $node) {
-        echo "kommer denna returna taint?\n";
         $functionName = $node->name->toString();
+
+        //echo "wutwut ", get_class($functionName), "\n";
         $sanitizer = $this->_getSanitizer($functionName);
+        //echo "wutwut2-------------- ", get_class($functionName), "\n";
         if ($sanitizer) {
             if ($sanitizer->taintedInput($node, $this->_options)) {
-                echo "funcall returns taint!\n";
-                print_r($sanitizer->returnedTaint($node, $this->_options));
                 return $sanitizer->returnedTaint($node, $this->_options);
             }
         }
