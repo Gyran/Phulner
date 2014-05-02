@@ -228,15 +228,16 @@ class Scoper extends NodeVisitorAbstract {
 
         // check if key exists, if not: create it
         if (!$var->hasKey($key)) {
+            $taint = [];
+
+            if ($var->getInherit()) {
+                $taint = $var->getTaint();
+            }
 
             if ($node->var instanceof Node\Expr\ArrayDimFetch) {
-                if ($var->getInherit()) {
-                    $var->addKey(new Variable\Array_($key, $var->getTaint(), true));
-                } else {
-                    $var->addKey(new Variable\Array_($key));
-                }
+                $var->addKey(new Variable\Array_($key, $taint, $var->getInherit()));
             } else {
-                $var->addKey(new Variable\Variable($key));
+                $var->addKey(new Variable\Variable($key, $taint));
             }
         }
 
