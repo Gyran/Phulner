@@ -26,11 +26,10 @@ class Replacer extends NodeVisitorAbstract {
         if (method_exists($this, $method)) {
             return $this->$method($node);
         }
-        echo stringColor("Replacer: Missing method " . $method . "\n", "1;31");
+        //echo stringColor("Replacer: Missing method " . $method . "\n", "1;31");
     }
 
     private function _leaveNode_Expr_FuncCall (Node\Expr\FuncCall $node) {
-
         if ($this->_removesTaint($node)) {
             $functionName = $node->name->toString();
             $sanitizer = $this->_sanitationFunctionFactory->get($functionName);
@@ -39,7 +38,30 @@ class Replacer extends NodeVisitorAbstract {
             echo stringColor(sprintf("Replacing function %s\n", $functionName), "1;32");
             return $newNode;
         }
+    }
 
+    private function _leaveNode_Expr_BinaryOp_Plus (Node\Expr\BinaryOp\Plus $node) {
+        return $this->_leaveNode_Expr_BinaryOp_Number($node);
+    }
+
+    private function _leaveNode_Expr_BinaryOp_Minus (Node\Expr\BinaryOp\Minus $node) {
+        return $this->_leaveNode_Expr_BinaryOp_Number($node);
+    }
+
+    private function _leaveNode_Expr_BinaryOp_Number (Node\Expr\BinaryOp $node) {
+        if ($node->left instanceof Node\Scalar) {
+            // left node is scalar
+            if (!empty($node->right->taint)) {
+                return $node->right;
+            }
+        } else if ($node->right instanceof Node\Scalar) {
+            // right node is scalar
+            if (!empty($node->left->taint)) {
+                return $node->left;
+            }
+        } else { // none is scalar
+
+        }
     }
 
     private function _removesTaint (Node $node) {

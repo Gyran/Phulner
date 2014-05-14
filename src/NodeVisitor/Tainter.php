@@ -35,7 +35,7 @@ class Tainter extends NodeVisitorAbstract {
         if (method_exists($this, $method)) {
             return $this->$method($node);
         }
-        echo stringColor("Tainter: Missing method " . $method . "\n", "1;31");
+        //echo stringColor("Tainter: Missing method " . $method . "\n", "1;31");
     }
 
     private function _leaveNode_Arg (Node\Arg $node) {
@@ -59,6 +59,14 @@ class Tainter extends NodeVisitorAbstract {
         $node->var->scopeVar->setTaint($taint);
         $node->var->taint = $taint;
         $node->taint = $taint;
+    }
+
+    private function _leaveNode_Expr_BinaryOp_Plus (Node\Expr\BinaryOp\Plus $node) {
+        $node->taint = [];
+    }
+
+    private function _leaveNode_Expr_BinaryOp_Minus (Node\Expr\BinaryOp\Minus $node) {
+        $node->taint = [];
     }
 
     private function _returnsTaint (Node\Expr $expr) {

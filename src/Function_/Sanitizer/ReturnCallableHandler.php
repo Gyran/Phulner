@@ -21,7 +21,8 @@ class ReturnCallableHandler {
         if ($this->_successor) {
             return $this->_successor->handleRequest($funcCall, $options);
         }
-        return null;
+
+        print_r($options);
     }
 
     protected function canHandle (FuncCall $funcCall, $options) {

@@ -17,8 +17,10 @@ use Phulner\PhpParser\NodeDumper;
 class Xss extends InjectorAbstract {
     const DEFAULT_METHOD = "tainting";
 
-    public function __construct () {
+    public function __construct ($partConfig, $wholeConfig) {
         $this->_method = self::DEFAULT_METHOD;
+        $this->_partConfig = $partConfig;
+        $this->_wholeConfig = $wholeConfig;
     }
 
     public function setSanitationFunctionsFactory (Factory $factory) {
@@ -49,6 +51,14 @@ class Xss extends InjectorAbstract {
     }
 
     public function inject_tainting ($code, $options) {
+        if (!in_array($options->sanitation, $this->_partConfig->sanitation)) {
+            $options->sanitation = $this->_partConfig->sanitation[0];
+        }
+
+        if (!isset($options->output) || !in_array($options->output, $this->_wholeConfig->output)) {
+            $options->output = $this->_wholeConfig->output[0];
+        }
+
         $nodeDumper = new NodeDumper;
         $prettyPrinter = new PrettyPrinter;
 
@@ -60,7 +70,6 @@ class Xss extends InjectorAbstract {
 
         $scoper = new Scoper($this->_initialScope, $options);
         $traverser->addVisitor($scoper);
-
         $tainter = new Tainter($this->_sanitationFunctionsFactory, $options);
         $traverser->addVisitor($tainter);
         $replacer = new Replacer($this->_sanitationFunctionsFactory, $options);
@@ -88,6 +97,8 @@ class Xss extends InjectorAbstract {
     private $_sanitationFunctionsFactory;
     private $_initialScope;
     private $_method;
+    private $_partConfig;
+    private $_wholeConfig;
 }
 
 ?>
