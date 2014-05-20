@@ -18,11 +18,28 @@ class Helpers {
         return false;
     }
 
+    static public function variable ($name) {
+        return new Node\Expr\Variable($name);
+    }
+
+    static public function arrayDimFetch ($var, $dim) {
+        return new Node\Expr\ArrayDimFetch($var, $dim);
+    }
+
     /* Commonly used functions in handlers */
     // can
     static public function can_always () {
         return function (Node\Expr\FuncCall $funcCall, $options) {
             return true;
+        };
+    }
+
+    public function can_input ($input) {
+        return function (Node\Expr\FuncCall $funcCall, $options) use ($input) {
+            if ($options->input === $input) {
+                return true;
+            }
+            return false;
         };
     }
 
@@ -207,6 +224,12 @@ class Helpers {
     static public function input_handler_always_argument ($argument) {
         $can = Helpers::can_always();
         $do = Helpers::input_argument($argument);
+        return new ReturnCallableHandler($can, $do);
+    }
+
+    static public function input_handler_always_taint ($taint) {
+        $can = Helpers::can_always();
+        $do = Helpers::return_taint($taint);
         return new ReturnCallableHandler($can, $do);
     }
 

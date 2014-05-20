@@ -58,6 +58,9 @@ class Xss extends InjectorAbstract {
         if (!isset($options->output) || !in_array($options->output, $this->_wholeConfig->output)) {
             $options->output = $this->_wholeConfig->output[0];
         }
+        if (!isset($options->input) || !in_array($options->input, $this->_wholeConfig->input)) {
+            $options->input = $this->_wholeConfig->input[0];
+        }
 
         $nodeDumper = new NodeDumper;
         $prettyPrinter = new PrettyPrinter;

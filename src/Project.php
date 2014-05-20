@@ -21,6 +21,7 @@ class Project {
     public function __construct ($path) {
         $this->_path = $path;
         $this->_affectedFiles = [];
+        $this->_files = [];
     }
 
     public function addConfig ($config) {

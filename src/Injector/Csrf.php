@@ -39,7 +39,7 @@ CODE;
         if ($options->type === "COMPUTABLE") {
             $ret =
 <<<'CODE'
-if ($_POST["phulner_csrf_token"] !== md5(date("Y-m-d"))) {
+if (!isset($_POST["phulner_csrf_token"]) || $_POST["phulner_csrf_token"] !== md5(date("Y-m-d"))) {
     die();
 }
 CODE;
