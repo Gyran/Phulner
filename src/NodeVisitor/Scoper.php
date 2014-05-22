@@ -130,11 +130,12 @@ class Scoper extends NodeVisitorAbstract {
         return $var;
     }
 
-    private function _returnsVariable_Expr_ArrayDimFetch ($name, Node $node) {
+    /*private function _returnsVariable_Expr_ArrayDimFetch ($name, Node $node) {
+        print_r($node);
         $var = clone $node->scopeVar;
         $var->setName($name);
         return $var;
-    }
+    }*/
 
     private function _returnsValue ($node) {
         $method = "_returnsValue_" . $node->getType();
