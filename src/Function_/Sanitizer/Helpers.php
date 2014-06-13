@@ -108,6 +108,12 @@ class Helpers {
         return new ReturnCallableHandler($can, $do);
     }
 
+    static public function return_handler_always_argumentTaint ($argument) {
+        $can = Helpers::can_always();
+        $do = Helpers::return_taintFromArgument($argument);
+        return new ReturnCallableHandler($can, $do);
+    }
+
     // replace
     //// returns the argument number $num
     public function replace_returnArgument ($num) {

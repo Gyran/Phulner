@@ -8,40 +8,13 @@ return function () {
     $function = new Sanitizer("intval");
 
     // returned taint chain
-    {
-        $can = Helpers::can_always();
-        $do = Helpers::return_noTaint();
-        $handler = new ReturnCallableHandler($can, $do);
-        $function->addReturnedTaintHandler($handler);
-    }
+    $function->addReturnedTaintHandler(Helpers::return_handler_always_noTaint());
 
     // input tainted chain
-    {
-        $can = Helpers::can_always();
-        $do = Helpers::input_argument(0);
-        $handler = new ReturnCallableHandler($can, $do);
-        $function->addTaintedInputHandler($handler);
-    }
+    $function->addTaintedInputHandler(helpers::input_handler_always_argument(0));
 
     // replace chain
-    {
-        // sanitation === NONE
-        {
-            $can = Helpers::can_sanitation("NONE");
-            $do = Helpers::replace_returnArgument(0);
-            $handler = new ReturnCallableHandler($can, $do);
-            $function->addReplaceHandler($handler);
-        }
-        { // sanitation === INSUFFICIENT_ENCODING
-            // make sure htmlspecialchars is called without ENT_QUOTES
-            $can = Helpers::can_sanitation("INSUFFICIENT_ENCODING");
-            $do = function (FuncCall $funcCall, $options) {
-                return Helpers::replace_htmlspecialchars($funcCall->args[0]);
-            };
-            $handler = new ReturnCallableHandler($can, $do);
-            $function->addReplaceHandler($handler);
-        }
-    }
+    $function->addReplaceHandler(Helpers::replace_handler_none_returnArgument(0));
 
     return $function;
 }
