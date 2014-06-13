@@ -28,7 +28,8 @@ if ($argc !== 2) {
     exit;
 }
 
-$inconfigPath = getcwd() . "/" . $argv[1];
+//$inconfigPath = getcwd() . "/" . $argv[1];
+$inconfigPath = $argv[1];
 $inconfig = json_decode(file_get_contents($inconfigPath));
 if ($inconfig === null) {
     echo stringColor(sprintf("%s couldn't be parsed as JSON\n", $inconfigPath), "0;31");
