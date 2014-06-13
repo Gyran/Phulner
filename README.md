@@ -1,5 +1,6 @@
 Phulner
 =====================
+This tool was created as part of a master thesis at FOI.
 
 Installation
 ---------------
