@@ -14,7 +14,8 @@ php composer.phar install
 
 Using
 ---------------
-[Prepare a Project][preparing_a_project] and then [run Phulner][running_phulner]
+[Prepare a Project][preparing_a_project] and then [run Phulner][running_phulner]. More information in the [doc folder][docs]
 
+ [docs]: doc
  [running_phulner]: doc/running_phulner.md
  [preparing_a_project]: doc/preparing_a_project.md
