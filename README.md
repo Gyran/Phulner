@@ -1,6 +1,8 @@
 Phulner
 =====================
-This tool was created as part of a master thesis at FOI.
+This tool was created as part of a master thesis at FOI. 
+
+Thesis can be found at http://www.diva-portal.org/smash/get/diva2:758641/FULLTEXT01.pdf
 
 Installation
 ---------------
