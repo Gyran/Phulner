@@ -1,0 +1,110 @@
+{
+    "name": "wordpress",
+
+    "basedir": "files/",
+
+    "vulnerabilities": {
+        "xss_commentsContent": {
+            "description": "Removes all apply_filters on 'pre_comment_content' so no filters will be applied",
+            "type": "xss",
+            "options": {
+                "input": ["STORED"],
+                "sanitation": ["NONE", "BLACKLIST"],
+                "output": ["NORMAL_TAG"],
+                "mutated": [false]
+            },
+            "files": [
+                "wp-includes/comment.php"
+            ],
+            "sanitationFunctions": [
+                "sanitationFunctions/apply_filters.php"
+            ]
+        },
+        "xss_commentsAuthorUrl": {
+            "description": "",
+            "type": "xss",
+            "options": {
+                "input": ["STORED"],
+                "sanitation": ["NONE", "BLACKLIST", "WHITELIST", "ENCODING"],
+                "output": ["URL_SINGLEQUOTES"],
+                "mutated": [false]
+            },
+            "files": [
+                "wp-includes/comment.php",
+                "wp-includes/comment-template.php"
+            ],
+            "sanitationFunctions": [
+                "sanitationFunctions/apply_filters.php",
+                "sanitationFunctions/esc_url.php"
+            ]
+        },
+
+        "xss_commentsAuthor": {
+            "description": "",
+            "type": "xss",
+            "options": {
+                "input": ["STORED"],
+                "sanitation": ["NONE", "BLACKLIST"],
+                "output": ["NORMAL_TAG"],
+                "mutated": [false]
+            },
+            "files": [
+                "wp-includes/comment.php",
+                "wp-comments-post.php"
+            ],
+            "sanitationFunctions": [
+                "sanitationFunctions/apply_filters.php"
+            ]
+        },
+
+        "xss_search": {
+            "description": "reflected search",
+            "type": "xss",
+            "options": {
+                "input": ["GET"],
+                "sanitation": ["NONE", "BLACKLIST"],
+                "output": ["NONJS_DOUBLEQUOTES"],
+                "mutated": [false]
+            },
+            "files": [
+                "wp-includes/general-template.php"
+            ],
+            "sanitationFunctions": [
+                "sanitationFunctions/esc_attr.php"
+            ]
+        },
+
+        "csrf_autosave": {
+            "description": "makes it possible to use the ajax-autosave action",
+            "type": "csrf",
+            "options": {
+                "types": ["NONE"]
+            },
+            "files": [
+                "wp-admin/includes/ajax-actions.php"
+            ]
+        },
+        "csrf_editpost": {
+            "description": "makes it possible to use call the edit post action",
+            "type": "csrf",
+            "options": {
+                "types": ["NONE", "COMPUTABLE"]
+            },
+            "files": [
+                "wp-admin/post.php",
+                "wp-admin/edit-form-advanced.php"
+            ]
+        },
+        "csrf_comment": {
+            "description": "Default only POST requests are allowed to post comments, other then that no CSRF is applied",
+            "type": "csrf",
+            "options": {
+                "types": ["NONE", "COMPUTABLE", "ONLY_POST"]
+            },
+            "files": [
+                "wp-includes/comment-template.php",
+                "wp-comments-post.php"
+            ]
+        }
+    }
+}
