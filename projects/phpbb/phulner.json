@@ -1,0 +1,40 @@
+
+{
+    "name": "phpBB3",
+    "basedir": "files/",
+
+    "vulnerabilities": {
+        "xss_postMessage": {
+            "description": "This will show both when a messages is posted and previewed",
+            "type": "xss",
+            "options": {
+                "input": ["POST", "STORED"],
+                "sanitation": ["NONE"],
+                "output": ["NORMAL_TAG"],
+                "mutated": [false]
+            },
+            "files": [
+                "posting.php"
+            ],
+            "sanitationFunctions": [
+                "sanitationFunctions/request_var.php"
+            ]
+        },
+        "xss_findAMember_username": {
+            "description": "What the user types in the username search box",
+            "type": "xss",
+            "options": {
+                "input": ["POST"],
+                "sanitation": ["NONE", "BLACKLIST"],
+                "output": ["NONJS_DOUBLEQUOTES"],
+                "mutated": [false]
+            },
+            "files": [
+                "memberlist.php"
+            ],
+            "sanitationFunctions": [
+                "sanitationFunctions/request_var.php"
+            ]
+        }
+    }
+}
