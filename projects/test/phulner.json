@@ -1,0 +1,86 @@
+{
+    "name": "Test app",
+
+    "vulnerabilities": {
+        "xss_htmlspecialchars_ent_quotes": {
+            "type": "xss",
+            "options": {
+                "input": ["GET", "POST"],
+                "sanitation": ["NONE", "BLACKLIST"],
+                "output": ["NORMAL_TAG"],
+                "mutated": [false]
+            },
+            "files": [
+                "input.php",
+                "output.php"
+            ]
+        },
+        "xss_intval": {
+            "type": "xss",
+            "options": {
+                "input": ["GET"],
+                "sanitation": ["BLACKLIST"],
+                "output": ["NORMAL_TAG"],
+                "mutated": [false]
+            },
+            "files": [
+                "input.php"
+            ]
+        },
+        "xss_htmlspecialchars": {
+            "type": "xss",
+            "options": {
+                "input": ["GET"],
+                "sanitation": ["BLACKLIST"],
+                "output": ["NORMAL_TAG"],
+                "mutated": [false]
+            },
+            "files": [
+                "input.php"
+            ]
+        },
+        "phpbb3": {
+            "type": "xss",
+            "options": {
+                "input": ["GET"],
+                "sanitation": ["NONE"],
+                "output": ["NORMAL_TAG"],
+                "mutated": [false]
+            },
+            "files": [
+                "output.php"
+            ]
+        },
+        "csrf": {
+            "type": "csrf",
+            "options": {
+                "types": ["NONE"]
+            },
+            "files": [
+                "csrf.php"
+            ]
+        },
+        "xss_remove": {
+            "type": "xss",
+            "options": {
+                "method": "tainting",
+                "input": ["GET"]
+            },
+            "files": [
+                "input.php"
+            ]
+        },
+        "xss_plus": {
+            "type": "xss",
+            "options": {
+                "input": ["GET"],
+                "sanitation": ["BLACKLIST"],
+                "output": ["NORMAL_TAG"],
+                "mutated": [false]
+            },
+            "files": [
+                "input.php"
+            ]
+        }
+    }
+}
